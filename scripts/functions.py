@@ -5,22 +5,26 @@ import boto3
 import logging
 import botocore
 import requests
+from typing import Union
 from dotenv import load_dotenv
 
 load_dotenv()
 logging.basicConfig(filename='application.log', level=logging.ERROR)
 
-def quarterly_metrics_are_consistent(data) -> bool:
-    keys = set(data[0]["quarterlyReports"][0].keys())
+def quarterly_metrics_are_consistent(data) -> Union[bool, None]:
+    keys = None
     for ticker_data in data:
         for report in ticker_data["quarterlyReports"]:
-            report_keys = set(report.keys())
-            if keys != report_keys:
-                print('Keys are not matching.')
-                return False
+            if keys is None:
+                keys = set(report.keys())
             else:
-                print('Keys are matching.')
-                return True
+                report_keys = set(report.keys())
+                if keys != report_keys:
+                    error_message = 'The keys are not valid.'
+                    logging.error(error_message)
+                    raise ValueError(error_message)
+    print('Keys are matching.')
+    return True
 
 def get_fincancials(tickers, function) -> list:
     av_key = os.environ.get('AV_KEY')
@@ -113,3 +117,10 @@ def load_to_s3(csv_file) -> None:
         logging.error('AWS region not found or not provided.')
     except Exception as e:
         logging.error('An error occurred while connecting to S3:', e)
+
+def delete_local_file(file_path):
+    try:
+        os.remove(file_path)
+        print(f"File '{file_path}' deleted successfully.")
+    except OSError as e:
+        print(f"Error occurred while deleting file '{file_path}': {e}")

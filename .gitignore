@@ -3,3 +3,6 @@ __pycache__
 test.ipynb
 .env
 quarterly_data.csv
+*.DS_Store
+*.twb
+*.twbr
