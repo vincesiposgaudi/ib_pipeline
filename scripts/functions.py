@@ -11,21 +11,6 @@ from dotenv import load_dotenv
 load_dotenv()
 logging.basicConfig(filename='application.log', level=logging.ERROR)
 
-def quarterly_metrics_are_consistent(data) -> Union[bool, None]:
-    keys = None
-    for ticker_data in data:
-        for report in ticker_data["quarterlyReports"]:
-            if keys is None:
-                keys = set(report.keys())
-            else:
-                report_keys = set(report.keys())
-                if keys != report_keys:
-                    error_message = 'The keys are not valid.'
-                    logging.error(error_message)
-                    raise ValueError(error_message)
-    print('Keys are matching.')
-    return True
-
 def get_fincancials(tickers, function) -> list:
     av_key = os.environ.get('AV_KEY')
 
@@ -78,6 +63,53 @@ def get_quarterly_financials(raw_input) -> str:
 
     print(f"CSV file '{csv_file}' has been created.")
     return csv_file
+
+def quarterly_metrics_are_consistent(data) -> Union[bool, None]:
+    keys = None
+    for ticker_data in data:
+        for report in ticker_data["quarterlyReports"]:
+            if keys is None:
+                keys = set(report.keys())
+            else:
+                report_keys = set(report.keys())
+                if keys != report_keys:
+                    error_message = 'The keys are not valid.'
+                    logging.error(error_message)
+                    raise ValueError(error_message)
+    print('Keys are matching.')
+    return True
+
+def get_weekly_financials(raw_input) -> str:
+    csv_file = 'weekly_data.csv'
+    keys = list(list(raw_input[0]['Weekly Adjusted Time Series'].values())[0].keys())
+
+    with open(csv_file, 'w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(['symbol'] + keys)  
+        for item in raw_input:
+            symbol = item['Meta Data']['2. Symbol']
+            weekly_data = item['Weekly Adjusted Time Series']
+            for date, values in weekly_data.items():
+                row = [symbol, date]
+                row.extend([values.get(key) for key in keys])
+                writer.writerow(row)
+    print(f"CSV file '{csv_file}' has been created.")
+    return csv_file
+
+def weekly_metrics_are_consistent(data) -> Union[bool, None]:
+    keys = None
+    for ticker_data in data:
+        for report in ticker_data["Weekly Adjusted Time Series"].values():
+            if keys is None:
+                keys = set(report.keys())
+            else:
+                report_keys = set(report.keys())
+                if keys != report_keys:
+                    error_message = 'The keys are not valid.'
+                    logging.error(error_message)
+                    raise ValueError(error_message)
+    print('Keys are matching.')
+    return True
 
 def load_to_s3(csv_file) -> None:
     print('Accessing S3...')
