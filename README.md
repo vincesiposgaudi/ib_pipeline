@@ -7,7 +7,7 @@ The pipeline aims to provide quarterly reports and weekly stock data about top i
 Data is first extracted from the Alpha Vantage API with Python and then stored locally. After some data validation, the unstructured JSON data is transformed into a structured CSV, which is then uploaded to Amazon S3. Upon successful loading, the raw and transformed data are deleted from the local storage. The data pipeline is orchestrated by Apache Airflow; the DAGs run on a weekly and quarterly basis.
 
 ## The architecture
-![architecture](https://github.com/vincesiposgaudi/ib_comp/blob/main/project_architecture_v1.png)
+![project_architecture_v1](./project_architecture_v1.png)
 
 ## How to run the project
 
