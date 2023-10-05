@@ -26,17 +26,16 @@ tickers = [
 default_args = {
     'owner': 'Vince',
     'depends_on_past': False,
-    'start_date': datetime(2023, 1, 1),
+    'start_date': datetime(2023, 10, 2),
     'retries': 1,
     'retry_delay': timedelta(seconds=60),
-    # Run every Monday at midnight (UTC)
-    'schedule_interval': '0 0 * * 1'
+    'catch_up': False
 }
 
 with DAG(dag_id='weekly_financials',
-         default_args=default_args,
-         schedule_interval=None,
-         tags=['my_dags'],
+         default_args = default_args,
+         schedule_interval = '0 12 * * 1',
+         tags=['my_dags']
 ) as dag:
     
     start_task = EmptyOperator(

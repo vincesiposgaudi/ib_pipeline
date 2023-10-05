@@ -29,14 +29,13 @@ default_args = {
     'start_date': datetime(2023, 1, 1),
     'retries': 1,
     'retry_delay': timedelta(seconds=60),
-    # Run every Monday at midnight (UTC)
-    #'schedule_interval': '0 0 * * 1'
+    'catch_up': False
 }
 
 with DAG(dag_id='quarterly_financials',
-         default_args=default_args,
-         schedule_interval=None,
-         tags=['my_dags'],
+         default_args = default_args,
+         schedule_interval = '0 1 12 1,4,7,10 *',
+         tags=['my_dags']
 ) as dag:
     
     start_task = EmptyOperator(
