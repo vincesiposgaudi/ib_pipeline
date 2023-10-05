@@ -8,6 +8,8 @@ test.ipynb
 *.twbr
 logs/
 venv/
+raw-data/
+processed-data/
 airflow-webserver.pid
 airflow.cfg
 airflow.db
