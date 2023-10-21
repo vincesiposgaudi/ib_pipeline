@@ -28,13 +28,14 @@ default_args = {
     'depends_on_past': False,
     'start_date': datetime(2023, 10, 2),
     'retries': 1,
-    'retry_delay': timedelta(seconds=60),
-    'catch_up': False
+    'retry_delay': timedelta(seconds=60)
 }
 
 with DAG(dag_id='weekly_financials',
          default_args = default_args,
-         schedule_interval = '0 12 * * 1',
+         #schedule_interval = '0 12 * * 1',
+         #catchup = False,
+         schedule_interval = None,
          tags=['my_dags']
 ) as dag:
     

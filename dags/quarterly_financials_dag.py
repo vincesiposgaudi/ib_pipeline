@@ -26,15 +26,15 @@ tickers = [
 default_args = {
     'owner': 'Vince',
     'depends_on_past': False,
-    'start_date': datetime(2023, 1, 1),
+    'start_date': datetime(2023, 10, 2),
     'retries': 1,
-    'retry_delay': timedelta(seconds=60),
-    'catch_up': False
+    'retry_delay': timedelta(seconds=60)
 }
 
 with DAG(dag_id='quarterly_financials',
          default_args = default_args,
-         schedule_interval = '0 1 12 1,4,7,10 *',
+         schedule_interval = '0 12 5 1,4,7,10 *',
+         catchup = False,
          tags=['my_dags']
 ) as dag:
     
