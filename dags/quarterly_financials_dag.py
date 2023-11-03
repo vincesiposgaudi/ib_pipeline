@@ -66,8 +66,8 @@ with DAG(dag_id='quarterly_financials',
         dag = dag
     )
 
-    weekly_upload_to_s3 = PythonOperator(
-        task_id = 'weekly_upload_to_s3',
+    quarterly_upload_to_s3 = PythonOperator(
+        task_id = 'quarterly_upload_to_s3',
         python_callable = f.load_to_s3,
         op_kwargs = {'pulled_task_id': 'transform_quarterly_data', 'pulled_key': 'csv_file_path'},
         provide_context = True,
@@ -82,12 +82,12 @@ with DAG(dag_id='quarterly_financials',
         provide_context = True,
         dag = dag
     )
-    
+
     end_task = EmptyOperator(
         task_id='end_task'
     )
 
-    start_task >> get_quarterly_data >> validate_quarterly_data >> transform_quarterly_data >> weekly_upload_to_s3 >> delete_quarterly_local_files >> end_task
+    start_task >> get_quarterly_data >> validate_quarterly_data >> transform_quarterly_data >> quarterly_upload_to_s3 >> delete_quarterly_local_files >> end_task
 
 if __name__ == "__main__":
     dag.cli()
