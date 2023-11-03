@@ -41,20 +41,15 @@ https://docs.aws.amazon.com/AmazonS3/latest/userguide/creating-bucket.html
   AWS_REGION=your AWS region
   BUCKET=your bucket name
   AV_KEY=your API key
+  AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=your postgres connection
 ```
-6. After setting the home directory for Airflow, run the scheduler and the webserver
+6. Run the startup script to set variables and run the scheduler and the webserver
 ```
-  export AIRFLOW_HOME=$(pwd) 
-```
-```
-  airflow scheduler
-```
-```
-  airflow webserver
+  ./startup.sh
 ```
 7. Trigger the DAGs through the Airflow UI
 
 ## Next phases:
 
-  - The data from Amazon S3 will be copied to Amazon Redshift, where it will be possible do further transformations using dbt to achieve the desired output tables.
+  - The data from Amazon S3 will be copied to Postgres, where it will be possible do further transformations using dbt to achieve the desired output tables.
   - The project will be containerized with Docker.
