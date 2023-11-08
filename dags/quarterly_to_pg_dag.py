@@ -15,12 +15,12 @@ default_args = {
 
 with DAG(dag_id='load_quarterly_to_dwh',
          default_args = default_args,
-         schedule_interval = '0 12 5 1,4,7,10 *',
+         schedule_interval = None,
          catchup = False,
          tags = ['my_dags'],
          template_searchpath = [airflow_home]
 ) as dag:
-
+    
     create_table = PostgresOperator(
         task_id="create_table",
         postgres_conn_id="postgres",

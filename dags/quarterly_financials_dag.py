@@ -2,9 +2,10 @@ import os
 import sys
 from airflow import DAG
 from datetime import datetime, timedelta 
-from airflow.operators.bash import BashOperator
-from airflow.operators.python import PythonOperator
 from airflow.operators.empty import EmptyOperator
+from airflow.operators.python import PythonOperator
+from airflow.operators.trigger_dagrun import TriggerDagRunOperator
+
 
 airflow_home = os.environ.get('AIRFLOW_HOME')
 if airflow_home:
@@ -83,11 +84,17 @@ with DAG(dag_id='quarterly_financials',
         dag = dag
     )
 
+    trigger_second_dag = TriggerDagRunOperator(
+    task_id='trigger_second_dag',
+    trigger_dag_id="load_quarterly_to_dwh",
+    dag=dag
+    )
+
     end_task = EmptyOperator(
         task_id='end_task'
     )
 
-    start_task >> get_quarterly_data >> validate_quarterly_data >> transform_quarterly_data >> quarterly_upload_to_s3 >> delete_quarterly_local_files >> end_task
-
+    start_task >> get_quarterly_data >> validate_quarterly_data >> transform_quarterly_data >> quarterly_upload_to_s3 >> delete_quarterly_local_files >> trigger_second_dag >> end_task
+    
 if __name__ == "__main__":
     dag.cli()
