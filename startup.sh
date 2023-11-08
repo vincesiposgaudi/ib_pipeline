@@ -15,8 +15,10 @@ kill_airflow_processes() {
 # Trap Ctrl+C and call the kill_airflow_processes function
 trap 'kill_airflow_processes' INT
 
-# Activate the virtual environment
-source venv/bin/activate
+# Check if the virtual environment is already activated
+if [ -z "$VIRTUAL_ENV" ]; then
+    source venv/bin/activate
+fi
 
 # Set environment variables
 source .env
