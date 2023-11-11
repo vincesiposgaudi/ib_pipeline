@@ -205,12 +205,15 @@ def load_to_s3(ti, pulled_task_id, pulled_key) -> bool:
     region = os.environ.get('AWS_REGION')
     bucket = str(os.environ.get('BUCKET'))
     file_name = csv_file
-    object_key = os.path.basename(csv_file)
+
+    #upload one file to keep historical data and one to be used in downstream tasks
+    object_keys = [os.path.basename(csv_file), f"{os.path.basename(csv_file).split('_20')[0]}.csv"]
+    
     if access_key is None or secret_key is None or region is None or bucket is None:
         error_message = 'One or more required S3 environment variables are missing.'
         logging.error(error_message)
         raise ValueError(error_message)
-
+    
     try:
         s3 = boto3.client(
             service_name = 's3',
@@ -220,8 +223,9 @@ def load_to_s3(ti, pulled_task_id, pulled_key) -> bool:
         )
         print('Connected to S3.')
         try:
-            s3.upload_file(file_name, bucket, object_key)
-            print(f"File '{object_key}' uploaded to S3 bucket '{bucket}'.")
+            for object_key in object_keys:
+                s3.upload_file(file_name, bucket, object_key)
+                print(f"File '{object_key}' uploaded to S3 bucket '{bucket}'.")
             return True
         except boto3.exceptions.S3UploadFailedError as e:
             logging.error('S3 upload failed:', e)
