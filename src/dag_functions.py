@@ -15,6 +15,22 @@ logging.basicConfig(filename='application.log', level=logging.DEBUG)
 
 # HELPER FUNCTIONS
 
+def parse_csv_to_list(filepath) -> list:
+    try:
+        with open(filepath, newline="") as file:
+            csv_reader = csv.reader(file)
+            next(csv_reader, None)
+            data_list = [[None if value == "None" else value for value in row] for row in csv_reader]
+            
+        return data_list
+    except FileNotFoundError:
+        logging.error(f"Error: File not found at '{filepath}'.")
+        return []
+    except Exception as e:
+        logging.error(f"An error occurred: {e}")
+        return []
+
+
 def create_output_folder(folder_type: str) -> str:
     valid_folders = ['raw-data', 'processed-data']
     if folder_type not in valid_folders:
