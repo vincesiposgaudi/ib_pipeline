@@ -169,7 +169,7 @@ def get_weekly_financials(ti, pulled_task_id, pulled_key, pushed_key) -> str:
 
     with open(csv_file_path, 'w', newline='') as f:
         writer = csv.writer(f)
-        writer.writerow(['symbol'] + keys)  
+        writer.writerow(['symbol', 'date'] + keys)  
         for item in raw_input:
             symbol = item['Meta Data']['2. Symbol']
             weekly_data = item['Weekly Adjusted Time Series']
