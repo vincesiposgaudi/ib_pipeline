@@ -28,8 +28,8 @@ default_args = {
     'owner': 'Vince',
     'depends_on_past': False,
     'start_date': datetime(2023, 10, 2),
-    'retries': 1,
-    'retry_delay': timedelta(seconds=60)
+    'retries': 2,
+    'retry_delay': timedelta(seconds=5)
 }
 
 with DAG(dag_id='quarterly_financials',
