@@ -9,7 +9,7 @@ from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 airflow_home = os.environ.get('AIRFLOW_HOME')
 if airflow_home:
     sys.path.append(airflow_home)
-    from src import dag_functions as f
+    from src.python import dag_functions as f
 
 tickers = [
     'BAC',    # Bank of America Merrill Lynch
