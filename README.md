@@ -23,6 +23,7 @@ Data is first extracted from the Alpha Vantage API with Python and then stored l
     - airflow
     - psycopg2
     - python-dotenv
+    - apache-airflow-providers-postgres
 ```
 by running:
 ```
@@ -31,25 +32,31 @@ pip3 install -r requirements.txt
 3. Instead of SQLite, use Postgres as a meta-database for Airflow\
 https://airflow.apache.org/docs/apache-airflow/stable/howto/set-up-database.html#setting-up-a-postgresql-database
 
-4. Create an S3 bucket in AWS\
+4. Create an S3 bucket in AWS to be used as a Data Lake\
 https://docs.aws.amazon.com/AmazonS3/latest/userguide/creating-bucket.html
 
-5. Create a .env file, to store credentials for Amazon S3 and the Alpha Vantage API key:
+5. Create a Postgres database named as ```dwh``` and a schema named as ```finance``` in it\
+https://www.postgresql.org/docs/current/manage-ag-createdb.html
+   
+7. Create the connection named as ```postgres``` to the Postgres Data Warehouse through the Airflow UI\
+https://airflow.apache.org/docs/apache-airflow/stable/howto/connection.html
+
+8. Create a .env file, to store credentials for Amazon S3 and the Alpha Vantage API key:
 ```
   AWS_ACCESS_KEY_ID=your access key
   AWS_SECRET_ACCESS_KEY=your secret access key
   AWS_REGION=your AWS region
   BUCKET=your bucket name
   AV_KEY=your API key
-  AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=your postgres connection
+  AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=your postgres connection for the airflow meta-database
 ```
-6. Run the startup script to set variables and run the scheduler and the webserver
+7. Run the startup script to set variables and run the scheduler and the webserver
 ```
   ./startup.sh
 ```
-7. Trigger the DAGs through the Airflow UI
+8. Trigger the DAGs through the Airflow UI
 
 ## Next phases:
 
-  - The data from Amazon S3 will be copied to Postgres, where it will be possible do further transformations using dbt to achieve the desired output tables.
+  - Implement dbt models to achieve the desired output tables.
   - The project will be containerized with Docker.
