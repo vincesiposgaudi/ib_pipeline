@@ -2,14 +2,14 @@ import os
 import sys
 from airflow import DAG
 from datetime import datetime, timedelta 
-from airflow.operators.bash import BashOperator
-from airflow.operators.python import PythonOperator
 from airflow.operators.empty import EmptyOperator
+from airflow.operators.python import PythonOperator
+from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 
 airflow_home = os.environ.get('AIRFLOW_HOME')
 if airflow_home:
     sys.path.append(airflow_home)
-    from src import dag_functions as f
+    from src.python import dag_functions as f
 
 tickers = [
     'BAC',    # Bank of America Merrill Lynch
@@ -27,14 +27,14 @@ default_args = {
     'owner': 'Vince',
     'depends_on_past': False,
     'start_date': datetime(2023, 10, 2),
-    'retries': 1,
-    'retry_delay': timedelta(seconds=60),
-    'catch_up': False
+    'retries': 2,
+    'retry_delay': timedelta(seconds=5)
 }
 
 with DAG(dag_id='weekly_financials',
          default_args = default_args,
          schedule_interval = '0 12 * * 1',
+         catchup = False,
          tags=['my_dags']
 ) as dag:
     
@@ -83,11 +83,17 @@ with DAG(dag_id='weekly_financials',
         dag = dag
     )
     
+    trigger_second_dag = TriggerDagRunOperator(
+    task_id='trigger_second_dag',
+    trigger_dag_id="load_weekly_to_dwh",
+    dag=dag
+    )
+
     end_task = EmptyOperator(
         task_id='end_task'
     )
 
-    start_task >> get_weekly_data >> validate_weekly_data >> transform_weekly_data >> weekly_upload_to_s3 >> delete_weekly_local_files >> end_task
+    start_task >> get_weekly_data >> validate_weekly_data >> transform_weekly_data >> weekly_upload_to_s3 >> delete_weekly_local_files >> trigger_second_dag >> end_task
 
 if __name__ == "__main__":
     dag.cli()

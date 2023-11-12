@@ -2,14 +2,15 @@ import os
 import sys
 from airflow import DAG
 from datetime import datetime, timedelta 
-from airflow.operators.bash import BashOperator
-from airflow.operators.python import PythonOperator
 from airflow.operators.empty import EmptyOperator
+from airflow.operators.python import PythonOperator
+from airflow.operators.trigger_dagrun import TriggerDagRunOperator
+
 
 airflow_home = os.environ.get('AIRFLOW_HOME')
 if airflow_home:
     sys.path.append(airflow_home)
-    from src import dag_functions as f
+    from src.python import dag_functions as f
 
 tickers = [
     'BAC',    # Bank of America Merrill Lynch
@@ -26,15 +27,15 @@ tickers = [
 default_args = {
     'owner': 'Vince',
     'depends_on_past': False,
-    'start_date': datetime(2023, 1, 1),
-    'retries': 1,
-    'retry_delay': timedelta(seconds=60),
-    'catch_up': False
+    'start_date': datetime(2023, 10, 2),
+    'retries': 2,
+    'retry_delay': timedelta(seconds=5)
 }
 
 with DAG(dag_id='quarterly_financials',
          default_args = default_args,
-         schedule_interval = '0 1 12 1,4,7,10 *',
+         schedule_interval = '0 12 5 1,4,7,10 *',
+         catchup = False,
          tags=['my_dags']
 ) as dag:
     
@@ -66,8 +67,8 @@ with DAG(dag_id='quarterly_financials',
         dag = dag
     )
 
-    weekly_upload_to_s3 = PythonOperator(
-        task_id = 'weekly_upload_to_s3',
+    quarterly_upload_to_s3 = PythonOperator(
+        task_id = 'quarterly_upload_to_s3',
         python_callable = f.load_to_s3,
         op_kwargs = {'pulled_task_id': 'transform_quarterly_data', 'pulled_key': 'csv_file_path'},
         provide_context = True,
@@ -82,12 +83,18 @@ with DAG(dag_id='quarterly_financials',
         provide_context = True,
         dag = dag
     )
-    
+
+    trigger_second_dag = TriggerDagRunOperator(
+    task_id='trigger_second_dag',
+    trigger_dag_id="load_quarterly_to_dwh",
+    dag=dag
+    )
+
     end_task = EmptyOperator(
         task_id='end_task'
     )
 
-    start_task >> get_quarterly_data >> validate_quarterly_data >> transform_quarterly_data >> weekly_upload_to_s3 >> delete_quarterly_local_files >> end_task
-
+    start_task >> get_quarterly_data >> validate_quarterly_data >> transform_quarterly_data >> quarterly_upload_to_s3 >> delete_quarterly_local_files >> trigger_second_dag >> end_task
+    
 if __name__ == "__main__":
     dag.cli()

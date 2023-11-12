@@ -15,6 +15,22 @@ logging.basicConfig(filename='application.log', level=logging.DEBUG)
 
 # HELPER FUNCTIONS
 
+def parse_csv_to_list(filepath) -> list:
+    try:
+        with open(filepath, newline="") as file:
+            csv_reader = csv.reader(file)
+            next(csv_reader, None)
+            data_list = [[None if value == "None" else value for value in row] for row in csv_reader]
+            
+        return data_list
+    except FileNotFoundError:
+        logging.error(f"Error: File not found at '{filepath}'.")
+        return []
+    except Exception as e:
+        logging.error(f"An error occurred: {e}")
+        return []
+
+
 def create_output_folder(folder_type: str) -> str:
     valid_folders = ['raw-data', 'processed-data']
     if folder_type not in valid_folders:
@@ -153,7 +169,7 @@ def get_weekly_financials(ti, pulled_task_id, pulled_key, pushed_key) -> str:
 
     with open(csv_file_path, 'w', newline='') as f:
         writer = csv.writer(f)
-        writer.writerow(['symbol'] + keys)  
+        writer.writerow(['symbol', 'date'] + keys)  
         for item in raw_input:
             symbol = item['Meta Data']['2. Symbol']
             weekly_data = item['Weekly Adjusted Time Series']
@@ -205,12 +221,15 @@ def load_to_s3(ti, pulled_task_id, pulled_key) -> bool:
     region = os.environ.get('AWS_REGION')
     bucket = str(os.environ.get('BUCKET'))
     file_name = csv_file
-    object_key = os.path.basename(csv_file)
+
+    #upload one file to keep historical data and one to be used in downstream tasks
+    object_keys = [os.path.basename(csv_file), f"{os.path.basename(csv_file).split('_20')[0]}.csv"]
+    
     if access_key is None or secret_key is None or region is None or bucket is None:
         error_message = 'One or more required S3 environment variables are missing.'
         logging.error(error_message)
         raise ValueError(error_message)
-
+    
     try:
         s3 = boto3.client(
             service_name = 's3',
@@ -220,8 +239,9 @@ def load_to_s3(ti, pulled_task_id, pulled_key) -> bool:
         )
         print('Connected to S3.')
         try:
-            s3.upload_file(file_name, bucket, object_key)
-            print(f"File '{object_key}' uploaded to S3 bucket '{bucket}'.")
+            for object_key in object_keys:
+                s3.upload_file(file_name, bucket, object_key)
+                print(f"File '{object_key}' uploaded to S3 bucket '{bucket}'.")
             return True
         except boto3.exceptions.S3UploadFailedError as e:
             logging.error('S3 upload failed:', e)
