@@ -4,10 +4,12 @@
 
 The pipeline aims to provide quarterly reports and weekly stock data about top investment banks that could be later used for dashboarding and other analytical usecases.
 
-Data is first extracted from the Alpha Vantage API with Python and then stored locally. After some data validation, the unstructured JSON data is transformed into a structured CSV, which is then uploaded to Amazon S3. Upon successful loading, the raw and transformed data are deleted from the local storage. After these steps, a new process loads the data incrementally from the Amazon S3 Data Lake to a Postgres Data Warehouse. A separate schema in the Data Warehouse, named as ```analytics``` acts as the semantic layer, where models can be utilized with the use of dbt. The data pipeline is orchestrated by Apache Airflow; the DAGs run on a weekly and quarterly basis.
+Data is first extracted from the Alpha Vantage API with Python and then stored locally. After some data validation, the unstructured JSON data is transformed into a structured CSV, which is then uploaded to Amazon S3. Upon successful loading, the raw and transformed data are deleted from the local storage. After these steps, a new process loads the data incrementally from the Amazon S3 Data Lake to a Postgres Data Warehouse. A separate schema in the Data Warehouse, named as ```analytics```, acts as the semantic layer where models can be utilized with the use of dbt. The data pipeline is orchestrated by Apache Airflow; the DAGs run on a weekly and quarterly basis.
 
 ## The architecture
-![project_architecture_v3](./project_architecture_v3.png)
+<p align="center">
+  <img src=./project_architecture_v3.png>
+</p>
 
 ## How to run the project
 1. Clone the repository
@@ -59,11 +61,14 @@ https://www.alphavantage.co/support/#api-key
   AV_KEY=your API key
   AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=your postgres connection for the airflow meta-database
 ```
-10. Run the startup script to set variables and run the scheduler and the webserver
+
+10. Initialize the ```ib_dbt``` project from the ```ib_dbt``` directory by running ```dbt init``` and connect to the ```finance``` schema in your ```dwh``` Postgres database.
+
+11. Run the startup script to set variables and run the scheduler and the webserver
 ```
   ./startup.sh
 ```
-11. Trigger the DAGs through the Airflow UI
+12. Trigger the DAGs through the Airflow UI
 
 ## Next phases:
 
