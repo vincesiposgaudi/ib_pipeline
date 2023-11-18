@@ -1,7 +1,8 @@
 import os
 import sys
 from airflow.models import DAG
-from datetime import datetime, timedelta 
+from datetime import datetime, timedelta
+from airflow.operators.empty import EmptyOperator
 from airflow.providers.postgres.operators.postgres import PostgresOperator
 from airflow.providers.amazon.aws.transfers.s3_to_sql import S3ToSqlOperator
 
@@ -39,6 +40,10 @@ with DAG(dag_id='load_weekly_to_dwh',
          template_searchpath = [airflow_home]
 ) as dag:
     
+    start_task = EmptyOperator(
+        task_id='start_task'
+    )
+
     create_table = PostgresOperator(
         task_id="create_table",
         postgres_conn_id="postgres",
@@ -56,7 +61,11 @@ with DAG(dag_id='load_weekly_to_dwh',
         sql_conn_id="postgres",
     )   
 
-    create_table >> transfer_s3_to_postgres
+    end_task = EmptyOperator(
+        task_id='end_task'
+    )
+
+    start_task >> create_table >> transfer_s3_to_postgres >> end_task
 
 if __name__ == "__main__":
     dag.cli()
