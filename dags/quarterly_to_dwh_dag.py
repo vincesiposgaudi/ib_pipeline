@@ -6,6 +6,7 @@ from airflow.providers.postgres.operators.postgres import PostgresOperator
 from airflow.providers.amazon.aws.transfers.s3_to_sql import S3ToSqlOperator
 
 cols = [
+    "data_as_of",
     "symbol",
     "fiscal_date_ending",
     "reported_currency",

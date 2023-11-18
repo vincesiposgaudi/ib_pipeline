@@ -1,4 +1,5 @@
 CREATE TABLE IF NOT EXISTS finance.income_statement (
+    "data_as_of" VARCHAR,
     "symbol" VARCHAR,
     "fiscal_date_ending" VARCHAR,
     "reported_currency" VARCHAR,
