@@ -30,7 +30,6 @@ def parse_csv_to_list(filepath) -> list:
         logging.error(f"An error occurred: {e}")
         return []
 
-
 def create_output_folder(folder_type: str) -> str:
     valid_folders = ['raw-data', 'processed-data']
     if folder_type not in valid_folders:
@@ -39,7 +38,7 @@ def create_output_folder(folder_type: str) -> str:
         raise ValueError(error_message)
     
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    data_folder = os.path.join(current_dir, '..', folder_type)
+    data_folder = os.path.join(current_dir, '../..', folder_type)
     os.makedirs(data_folder, exist_ok=True)
     return data_folder
 
@@ -169,12 +168,13 @@ def get_weekly_financials(ti, pulled_task_id, pulled_key, pushed_key) -> str:
 
     with open(csv_file_path, 'w', newline='') as f:
         writer = csv.writer(f)
-        writer.writerow(['symbol', 'date'] + keys)  
+        writer.writerow(['data_as_of', 'symbol', 'date'] + keys)  
         for item in raw_input:
             symbol = item['Meta Data']['2. Symbol']
             weekly_data = item['Weekly Adjusted Time Series']
             for date, values in weekly_data.items():
-                row = [symbol, date]
+                current_date = datetime.datetime.now().strftime('%Y-%m-%d')
+                row = [current_date, symbol, date]
                 row.extend([values.get(key) for key in keys])
                 writer.writerow(row)
     print(f"CSV file '{csv_file}' has been created.")
@@ -196,7 +196,7 @@ def get_quarterly_financials(ti, pulled_task_id, pulled_key, pushed_key) -> str:
 
     with open(csv_file_path, 'w', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow(['symbol'] + keys)
+        writer.writerow(['data_as_of', 'symbol'] + keys)
 
         for ticker in raw_input:
             symbol = ticker['symbol']
@@ -204,7 +204,8 @@ def get_quarterly_financials(ti, pulled_task_id, pulled_key, pushed_key) -> str:
             
             for report in quarterly_reports:
                 report_values = list(report.values())
-                row = [symbol] + report_values
+                current_date = datetime.datetime.now().strftime('%Y-%m-%d')
+                row = [current_date, symbol] + report_values
                 writer.writerow(row)
 
     print(f"The CSV file '{csv_file}' has been created.")
