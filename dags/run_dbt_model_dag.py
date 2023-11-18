@@ -33,7 +33,7 @@ with DAG(dag_id='run_dbt_model_dag',
 
     run_dbt_model = BashOperator(
         task_id='run_dbt_model',
-        bash_command=f"cd {dbt_dir} && dbt run --models test",
+        bash_command=f"cd {dbt_dir} && dbt run --models enrich_income_statements",
         dag=dag
     )
 
