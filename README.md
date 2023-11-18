@@ -47,7 +47,7 @@ https://www.postgresql.org/docs/current/manage-ag-createdb.html
 7. Create the connection named as ```postgres``` to the Postgres Data Warehouse through the Airflow UI\
 https://airflow.apache.org/docs/apache-airflow/stable/howto/connection.html
 
-8. Request a free API key from Alpha Vantage:
+8. Request a free API key from Alpha Vantage:\
 https://www.alphavantage.co/support/#api-key
 
 9. Create a .env file, to store credentials for Amazon S3 and the Alpha Vantage API key:
