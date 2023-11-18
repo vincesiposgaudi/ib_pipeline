@@ -24,7 +24,7 @@ with DAG(dag_id='run_dbt_model_dag',
          default_args = default_args,
          schedule_interval = None,
          catchup = False,
-         tags = ['my_dags'],
+         tags = ['my_dags']
 ) as dag:
     
     start_task = EmptyOperator(
@@ -32,9 +32,9 @@ with DAG(dag_id='run_dbt_model_dag',
     )
 
     run_dbt_model = BashOperator(
-    task_id='run_dbt_model',
-    bash_command=f"cd {dbt_dir} && dbt run --models test",
-    dag=dag
+        task_id='run_dbt_model',
+        bash_command=f"cd {dbt_dir} && dbt run --models test",
+        dag=dag
     )
 
     end_task = EmptyOperator(
